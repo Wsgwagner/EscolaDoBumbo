@@ -1,0 +1,182 @@
+/* Layout: barra de tempo fixa no topo (legível de longe, da banqueta), abas, e o conteúdo da aba em cartões */
+:root {
+  --fundo: #E8EBE7;          /* fundo da página: cinza-esverdeado de sala de ensaio */
+  --superficie: #F9FAF8;     /* fundo dos cartões */
+  --superficie2: #EEF1ED;    /* botões e áreas secundárias */
+  --tinta: #121513;          /* texto principal */
+  --apagado: #59615B;        /* texto secundário */
+  --linha: #CBD2CA;          /* bordas finas */
+  --bronze: #A2650C;         /* bronze de prato: cor principal do app */
+  --bronze-tinta: #FFFFFF;   /* texto em cima do bronze */
+  --direita: #1C6B88;        /* cor da mão direita (D) */
+  --esquerda: #A1336F;       /* cor da mão esquerda (E) */
+  --pele: #DCD7CB;           /* pele da caixa (círculos do metrônomo apagados) */
+  --mudo: #9AA29B;           /* tempo silenciado */
+  --certo: #2B7F4E;          /* indicador "tocando" */
+  --f-display: "Saira Extra Condensed", "Arial Narrow", "Roboto Condensed", sans-serif; /* números grandes */
+  --f-texto: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;     /* texto */
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;                       /* grade e contagem */
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { /* tema escuro do sistema: bom para sala com pouca luz */
+    --fundo: #0E1110; --superficie: #161A18; --superficie2: #1D2220; --tinta: #E7ECE8; --apagado: #96A099;
+    --linha: #2A312D; --bronze: #E2A445; --bronze-tinta: #1A1003; --direita: #52B4D8; --esquerda: #E26DAF;
+    --pele: #2C322F; --mudo: #4B534E; --certo: #4DBA7E; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] { /* tema escuro escolhido manualmente */
+  --fundo: #0E1110; --superficie: #161A18; --superficie2: #1D2220; --tinta: #E7ECE8; --apagado: #96A099;
+  --linha: #2A312D; --bronze: #E2A445; --bronze-tinta: #1A1003; --direita: #52B4D8; --esquerda: #E26DAF;
+  --pele: #2C322F; --mudo: #4B534E; --certo: #4DBA7E; color-scheme: dark;
+}
+
+html { -webkit-text-size-adjust: 100%; }                       /* evita o celular aumentar a fonte sozinho */
+body { margin: 0; }                                             /* tira a margem padrão do navegador */
+* { box-sizing: border-box; }                                   /* largura inclui borda e padding */
+[hidden] { display: none !important; }                         /* garante que abas escondidas sumam (o display:grid da .vista não vence) */
+body {
+  background: var(--fundo);                                     /* fundo explícito */
+  color: var(--tinta);                                          /* cor do texto */
+  font-family: var(--f-texto);                                  /* fonte de leitura */
+  font-size: 15px;                                              /* tamanho base */
+  line-height: 1.55;                                            /* entrelinha */
+  padding-left: max(16px, env(safe-area-inset-left, 0px));      /* respiro esquerdo */
+  padding-right: max(16px, env(safe-area-inset-right, 0px));    /* respiro direito */
+  padding-block: 18px 56px;                                     /* respiro vertical */
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--fundo); } /* pinta a faixa acima da barra fixa no celular */
+.app { max-width: 1200px; margin: 0 auto; display: grid; gap: 16px; } /* coluna central */
+h1, h2, h3 { margin: 0; text-wrap: balance; }                   /* títulos equilibrados */
+button, select, input { font: inherit; color: inherit; }        /* controles herdam a fonte */
+:focus-visible { outline: 2px solid var(--bronze); outline-offset: 2px; } /* foco visível */
+p { margin: 0; }                                                /* parágrafos sem margem: espaçamento vem do gap */
+
+/* ---------- Cabeçalho e abas ---------- */
+.topo { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px 24px; } /* marca + abas */
+.marca h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(2.4rem, 6vw, 3.4rem); line-height: .85; text-transform: uppercase; letter-spacing: .01em; } /* nome grande */
+.marca h1 span { color: var(--bronze); }                        /* destaque */
+.marca p { color: var(--apagado); margin-top: 6px; max-width: 58ch; } /* subtítulo */
+.abas { display: flex; flex-wrap: wrap; gap: 4px; background: var(--superficie2); border: 1px solid var(--linha); border-radius: 10px; padding: 4px; } /* trilho */
+.aba { border: 0; background: transparent; color: var(--apagado); font-weight: 600; font-size: 14px; padding: 8px 13px; border-radius: 7px; cursor: pointer; } /* aba */
+.aba[aria-selected="true"] { background: var(--superficie); color: var(--tinta); box-shadow: 0 1px 3px rgb(0 0 0 / .15); } /* aba ativa */
+
+/* ---------- Barra de tempo (fixa) ---------- */
+.transporte {
+  position: sticky; top: env(safe-area-inset-top, 0px);         /* fica presa no topo ao rolar */
+  z-index: 5;                                                   /* acima do conteúdo */
+  background: var(--superficie);                                /* fundo sólido */
+  border: 1px solid var(--linha); border-radius: 14px;          /* moldura */
+  padding: 12px 14px;                                           /* respiro interno */
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; /* itens em linha, quebram no celular */
+  box-shadow: 0 6px 18px -12px rgb(0 0 0 / .35);                /* sombra leve para separar do conteúdo */
+}
+.play { width: 64px; height: 64px; border-radius: 50%; border: 0; background: var(--bronze); color: var(--bronze-tinta); font-size: 24px; cursor: pointer; display: grid; place-items: center; flex: none; } /* botão grande de tocar */
+.play[aria-pressed="true"] { background: var(--tinta); color: var(--superficie); } /* tocando = botão vira "parar" */
+.bpm-bloco { display: flex; align-items: center; gap: 8px; }  /* − número + */
+.redondo { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--linha); background: var(--superficie2); font-size: 20px; font-weight: 600; cursor: pointer; flex: none; } /* botões − e + */
+.bpm-num { display: grid; justify-items: center; min-width: 96px; } /* número do andamento */
+.bpm-num strong { font-family: var(--f-display); font-weight: 800; font-size: 3.4rem; line-height: .9; font-variant-numeric: tabular-nums; } /* número enorme */
+.bpm-num span { font-size: 11px; color: var(--apagado); text-transform: uppercase; letter-spacing: .1em; } /* "bpm · Andante" */
+.trans-grupo { display: flex; flex-direction: column; gap: 6px; min-width: 0; } /* coluna de controles */
+.slider { accent-color: var(--bronze); width: 170px; max-width: 100%; } /* slider do bpm */
+.contador { margin-left: auto; text-align: right; display: grid; min-width: 150px; } /* compasso e tempo atuais */
+.contador strong { font-family: var(--f-display); font-weight: 800; font-size: 2.6rem; line-height: .9; font-variant-numeric: tabular-nums; } /* número do tempo */
+.contador span { font-size: 12px; color: var(--apagado); font-family: var(--f-mono); } /* texto do compasso */
+.contador.contando strong { color: var(--bronze); }             /* durante a contagem inicial */
+
+/* ---------- Controles comuns ---------- */
+.rotulo { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; color: var(--apagado); } /* rótulo pequeno */
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--linha); border-radius: 8px; overflow: hidden; } /* botões segmentados */
+.seg button { border: 0; background: var(--superficie2); color: var(--apagado); font-size: 13px; font-weight: 500; padding: 7px 11px; cursor: pointer; } /* opção */
+.seg button + button { border-left: 1px solid var(--linha); }  /* divisória */
+.seg button[aria-pressed="true"] { background: var(--bronze); color: var(--bronze-tinta); } /* ligado */
+.botao { border: 1px solid var(--linha); background: var(--superficie2); border-radius: 8px; padding: 8px 13px; font-weight: 600; font-size: 14px; cursor: pointer; } /* botão comum */
+.botao.prim { background: var(--bronze); border-color: var(--bronze); color: var(--bronze-tinta); } /* botão principal */
+select { font-size: 14px; background: var(--superficie2); border: 1px solid var(--linha); border-radius: 8px; padding: 7px 10px; max-width: 100%; } /* caixas de seleção */
+.grupo { display: flex; flex-direction: column; gap: 6px; min-width: 0; } /* rótulo + controle */
+.barra { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; } /* linha de controles */
+.cartao { background: var(--superficie); border: 1px solid var(--linha); border-radius: 12px; padding: 16px; display: grid; gap: 14px; align-content: start; min-width: 0; } /* bloco (conteúdo começa no topo mesmo se o cartão esticar) */
+.cartao h2 { font-family: var(--f-display); font-weight: 800; font-size: 1.9rem; text-transform: uppercase; line-height: 1; letter-spacing: .01em; } /* título de seção */
+.cartao h3 { font-size: 15px; font-weight: 700; }               /* subtítulo */
+.texto { color: var(--apagado); max-width: 70ch; }              /* parágrafo */
+.texto b, .lista b { color: var(--tinta); }                     /* destaques */
+.lista { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; color: var(--apagado); } /* listas */
+.caixa { border-left: 3px solid var(--bronze); background: var(--superficie2); padding: 8px 12px; border-radius: 0 8px 8px 0; color: var(--apagado); } /* dica */
+.caixa b { color: var(--tinta); }                               /* destaque na dica */
+.chip { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 99px; border: 1px solid currentColor; white-space: nowrap; } /* nível */
+.nv1 { color: var(--certo); } .nv2 { color: var(--direita); } .nv3 { color: var(--bronze); } /* cores por nível */
+.duas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; } /* duas colunas que empilham */
+.vista { display: grid; gap: 16px; }                            /* cada aba */
+.layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 16px; align-items: start; } /* lista + detalhe */
+.itens { display: grid; gap: 6px; }                             /* lista lateral */
+.item { text-align: left; border: 1px solid var(--linha); background: var(--superficie); border-radius: 10px; padding: 9px 12px; cursor: pointer; display: grid; gap: 2px; } /* item */
+.item[aria-pressed="true"] { border-color: var(--bronze); box-shadow: inset 3px 0 0 var(--bronze); } /* item escolhido */
+.item .nome { font-weight: 600; font-size: 14px; }              /* nome */
+.item .meta { font-size: 12px; color: var(--apagado); }         /* estilo/nível */
+.cab { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; } /* título + chip */
+.rolagem { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; } /* rolagem horizontal só da grade */
+
+/* ---------- Metrônomo ---------- */
+.tempos { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(10px, 2.5vw, 22px); padding: 10px 0; } /* círculos dos tempos */
+.tempo { width: clamp(64px, 12vw, 120px); aspect-ratio: 1; max-width: 100%; border-radius: 50%; border: 3px solid var(--linha); background: var(--pele); display: grid; place-items: center; cursor: pointer; font-family: var(--f-display); font-weight: 800; font-size: clamp(1.8rem, 4.5vw, 3.2rem); color: var(--apagado); transition: transform .06s ease, background .06s ease; } /* tempo */
+.tempo.a { border-color: var(--bronze); color: var(--bronze); } /* tempo acentuado */
+.tempo.m { opacity: .45; border-style: dashed; }               /* tempo mudo */
+.tempo.on { background: var(--direita); color: #fff; border-color: var(--direita); transform: scale(1.06); } /* tempo soando */
+.tempo.a.on { background: var(--bronze); border-color: var(--bronze); color: var(--bronze-tinta); } /* tempo acentuado soando */
+.subs { display: flex; justify-content: center; gap: 10px; min-height: 16px; } /* bolinhas da subdivisão */
+.subs i { width: 14px; height: 14px; border-radius: 50%; background: var(--pele); border: 1px solid var(--linha); } /* bolinha */
+.subs i.on { background: var(--tinta); }                        /* subdivisão soando */
+.italiano { text-align: center; font-family: var(--f-display); font-size: 1.6rem; font-weight: 600; color: var(--apagado); letter-spacing: .04em; } /* nome do andamento */
+
+/* ---------- Rudimentos ---------- */
+.mao-legenda { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--apagado); } /* legenda D/E */
+.mao-legenda b.d { color: var(--direita); } .mao-legenda b.e { color: var(--esquerda); } /* cores da legenda */
+.sticking { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; } /* 4 tempos do compasso */
+.tempo-rud { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; border-top: 3px solid var(--linha); padding-top: 8px; } /* um tempo com suas notas */
+.nota { display: grid; justify-items: center; gap: 2px; border-radius: 10px; padding: 6px 0; min-width: 0; } /* uma nota do rudimento */
+.nota .ac { font-family: var(--f-mono); font-weight: 600; font-size: 14px; height: 18px; color: var(--bronze); } /* acento ">" */
+.nota .mao { font-family: var(--f-display); font-weight: 800; font-size: clamp(2rem, 5.2vw, 3.6rem); line-height: 1; } /* letra D ou E grande */
+.nota.D .mao { color: var(--direita); } .nota.E .mao { color: var(--esquerda); } /* cor por mão */
+.nota.fraca .mao { opacity: .5; font-size: clamp(1.4rem, 3.6vw, 2.4rem); } /* nota fantasma */
+.nota.pausa .mao { color: var(--linha); }                       /* pausa */
+.nota .orn { font-family: var(--f-mono); font-size: 11px; color: var(--apagado); height: 15px; } /* flam/drag */
+.nota .cont { font-family: var(--f-mono); font-size: 12px; color: var(--apagado); } /* contagem 1 e & a */
+.nota.on { background: var(--superficie2); box-shadow: inset 0 -4px 0 var(--bronze); } /* nota soando */
+@media (max-width: 640px) { .sticking { grid-template-columns: repeat(2, minmax(0, 1fr)); } } /* 2 tempos por linha no celular */
+
+/* ---------- Grade de grooves ---------- */
+.grade { display: grid; min-width: max-content; font-family: var(--f-mono); font-size: 12px; } /* grade de passos */
+.grade .lab { position: sticky; left: 0; z-index: 1; background: var(--superficie); padding: 0 10px 0 0; display: grid; align-content: center; min-width: 150px; border: 0; text-align: left; cursor: pointer; font-family: var(--f-texto); } /* nome da peça (clique silencia) */
+.grade .lab b { font-size: 13px; }                              /* nome */
+.grade .lab small { font-size: 11px; color: var(--apagado); }   /* membro que toca */
+.grade .lab.muda b { text-decoration: line-through; color: var(--apagado); } /* peça silenciada */
+.grade .lab.bate b { color: var(--bronze); }                    /* peça acabou de soar */
+.grade .num { height: 22px; display: grid; place-items: center; color: var(--apagado); } /* contagem em cima */
+.grade .num.forte { color: var(--tinta); font-weight: 600; }    /* números dos tempos */
+.cel { width: 34px; height: 34px; border: 0; padding: 0; background: var(--superficie2); border-left: 1px solid var(--superficie); display: grid; place-items: center; cursor: pointer; } /* casa da grade */
+.cel.tb { border-left: 2px solid var(--linha); }                /* início de tempo */
+.cel.cp { border-left: 3px solid var(--apagado); }              /* início de compasso */
+.cel.atual { background: var(--pele); }                         /* coluna tocando */
+.cel i { width: 16px; height: 16px; border-radius: 50%; display: block; } /* marcação */
+.cel.nt i { background: var(--tinta); }                         /* nota normal */
+.cel.ac i { background: var(--bronze); width: 22px; height: 22px; } /* nota com acento */
+.cel.ab i { border: 3px solid var(--tinta); background: transparent; } /* chimbal aberto */
+.cel.gh i { width: 9px; height: 9px; background: var(--apagado); } /* nota fantasma */
+.cel.ar i { border-radius: 2px; background: transparent; position: relative; } /* aro (cross-stick) */
+.cel.ar i::before, .cel.ar i::after { content: ""; position: absolute; left: 7px; top: -1px; width: 3px; height: 18px; background: var(--tinta); transform: rotate(45deg); } /* desenho do "x" */
+.cel.ar i::after { transform: rotate(-45deg); }                  /* segunda perna do "x" */
+.legenda { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--apagado); align-items: center; } /* legenda dos símbolos */
+.legenda .cel { width: 24px; height: 24px; display: inline-grid; cursor: default; vertical-align: middle; margin-right: 4px; border: 0; } /* amostra */
+.variacoes { display: flex; flex-wrap: wrap; gap: 6px; }        /* chips das variações */
+.variacoes button { border: 1px solid var(--linha); background: var(--superficie2); border-radius: 8px; padding: 6px 11px; font-family: var(--f-mono); font-weight: 600; cursor: pointer; } /* variação */
+.variacoes button[aria-pressed="true"] { background: var(--bronze); border-color: var(--bronze); color: var(--bronze-tinta); } /* variação atual */
+
+/* ---------- Técnica ---------- */
+.plano { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; counter-reset: etapa; } /* rotina */
+.plano li { counter-increment: etapa; background: var(--superficie2); border: 1px solid var(--linha); border-radius: 10px; padding: 12px; display: grid; gap: 4px; align-content: start; } /* etapa */
+.plano li::before { content: counter(etapa); font-family: var(--f-display); font-weight: 800; font-size: 2rem; line-height: 1; color: var(--bronze); } /* número da etapa (a ordem importa) */
+.plano .min { font-family: var(--f-mono); font-size: 12px; color: var(--direita); font-weight: 600; } /* minutos */
+.tec-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; } /* cartões */
+
+@media (max-width: 860px) { .layout { grid-template-columns: minmax(0, 1fr); } .itens { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); } .contador { margin-left: 0; text-align: left; } } /* empilha no celular */
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } } /* sem animação para quem prefere */

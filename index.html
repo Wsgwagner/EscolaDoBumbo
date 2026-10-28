@@ -1,0 +1,171 @@
+<!DOCTYPE html> <!-- HTML5 (sem isso o navegador entra em "modo quirks") -->
+<html lang="pt-BR"> <!-- idioma da página -->
+<head>
+  <meta charset="UTF-8"> <!-- acentos funcionam -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"> <!-- adapta ao celular -->
+  <title>Escola do Bumbo</title> <!-- nome na aba -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"> <!-- conexão antecipada com o Google Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!-- idem para os arquivos de fonte -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Extra+Condensed:wght@600;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap"> <!-- fontes -->
+  <link rel="stylesheet" href="css/style.css"> <!-- nosso CSS -->
+</head>
+<body>
+<div class="app">
+  <header class="topo">
+    <div class="marca">
+      <h1>Escola do <span>Bumbo</span></h1>
+      <p>Guia e metrônomo para estudar na bateria de verdade. Deixe a tela na sua frente, aperte Espaço e toque junto.</p>
+    </div>
+    <nav class="abas" role="tablist" aria-label="Seções">
+      <button class="aba" role="tab" data-vista="metronomo">Metrônomo</button>
+      <button class="aba" role="tab" data-vista="rudimentos">Rudimentos</button>
+      <button class="aba" role="tab" data-vista="grooves">Ritmos</button>
+      <button class="aba" role="tab" data-vista="independencia">Independência</button>
+      <button class="aba" role="tab" data-vista="tecnica">Técnica e rotina</button>
+    </nav>
+  </header>
+
+  <!-- ===== Barra de tempo: vale para todas as abas ===== -->
+  <section class="transporte" aria-label="Andamento">
+    <button class="play" id="play" aria-pressed="false" aria-label="Iniciar (Espaço)">▶</button>
+    <div class="bpm-bloco">
+      <button class="redondo" id="menos" aria-label="Diminuir andamento">−</button>
+      <div class="bpm-num"><strong id="bpm-v">80</strong><span id="bpm-nome">bpm</span></div>
+      <button class="redondo" id="mais" aria-label="Aumentar andamento">+</button>
+    </div>
+    <div class="trans-grupo">
+      <input class="slider" type="range" id="bpm" min="30" max="240" step="1" aria-label="Andamento em bpm">
+      <div class="barra" style="gap:6px">
+        <button class="botao" id="tap">Tap</button>
+        <button class="botao" id="tela">Tela cheia</button>
+      </div>
+    </div>
+    <div class="trans-grupo">
+      <span class="rotulo">Opções</span>
+      <div class="seg" id="seg-opcoes"><button data-v="contagem">Contagem</button><button data-v="clique">Clique</button><button data-v="treinoAtivo">Subir andamento</button></div>
+    </div>
+    <div class="contador" id="contador"><strong id="cont-num">–</strong><span id="cont-txt">parado</span></div>
+  </section>
+
+  <!-- ===== METRÔNOMO ===== -->
+  <section class="vista" id="v-metronomo" hidden>
+    <div class="cartao">
+      <div class="tempos" id="tempos"></div>
+      <div class="subs" id="subs"></div>
+      <div class="italiano" id="italiano"></div>
+      <p class="texto" style="margin:0 auto;text-align:center">Toque num círculo para mudar o tempo: normal → acento → mudo.</p>
+    </div>
+    <div class="duas">
+      <div class="cartao">
+        <h2>Ajustes do clique</h2>
+        <div class="barra">
+          <div class="grupo"><span class="rotulo">Compasso</span><div class="seg" id="seg-compasso"><button data-v="2/4">2/4</button><button data-v="3/4">3/4</button><button data-v="4/4">4/4</button><button data-v="5/4">5/4</button><button data-v="6/8">6/8</button></div></div>
+          <div class="grupo"><span class="rotulo">Subdivisão</span><div class="seg" id="seg-subdiv"><button data-v="1">Semínima</button><button data-v="2">Colcheia</button><button data-v="3">Tercina</button><button data-v="4">Semicolcheia</button></div></div>
+          <div class="grupo"><span class="rotulo">Som do clique</span><div class="seg" id="seg-som"><button data-v="bipe">Bipe</button><button data-v="madeira">Madeira</button><button data-v="cowbell">Cowbell</button></div></div>
+          <div class="grupo"><label class="rotulo" for="vol-clique">Volume do clique</label><input class="slider" type="range" id="vol-clique" min="0" max="100"></div>
+          <div class="grupo"><label class="rotulo" for="vol-kit">Volume da bateria</label><input class="slider" type="range" id="vol-kit" min="0" max="100"></div>
+        </div>
+      </div>
+      <div class="cartao">
+        <h2>Treinos de tempo</h2>
+        <p class="texto">Valem para todas as abas.</p>
+        <div class="barra">
+          <div class="grupo"><span class="rotulo">Subir andamento</span>
+            <div class="barra" style="gap:8px;align-items:center">
+              <select id="treino-inc" aria-label="Quanto subir"><option value="2">+2 bpm</option><option value="4">+4 bpm</option><option value="5">+5 bpm</option><option value="10">+10 bpm</option></select>
+              <select id="treino-cada" aria-label="A cada quantos compassos"><option value="1">a cada compasso</option><option value="2">a cada 2 compassos</option><option value="4">a cada 4 compassos</option><option value="8">a cada 8 compassos</option></select>
+              <select id="treino-max" aria-label="Até qual andamento"></select>
+            </div>
+          </div>
+          <div class="grupo"><label class="rotulo" for="mudos">Compassos mudos</label>
+            <select id="mudos"><option value="0">Desligado</option><option value="1-1">Toca 1, cala 1</option><option value="2-2">Toca 2, cala 2</option><option value="3-1">Toca 3, cala 1</option><option value="4-4">Toca 4, cala 4</option></select>
+          </div>
+        </div>
+        <ul class="lista">
+          <li><b>Subir andamento:</b> começa no bpm atual e sobe sozinho até o limite. Ótimo para rudimentos.</li>
+          <li><b>Compassos mudos:</b> o app fica em silêncio por alguns compassos e você continua tocando. Quando o som voltar, você vê se correu ou atrasou. Silencia o clique e a bateria do app.</li>
+          <li><b>Atalhos:</b> Espaço inicia/para, ↑ ↓ mudam 1 bpm (com Shift, 5), T marca o tap.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== RUDIMENTOS ===== -->
+  <section class="vista" id="v-rudimentos" hidden>
+    <div class="layout">
+      <nav class="itens" id="rud-lista" aria-label="Rudimentos"></nav>
+      <div class="cartao">
+        <div class="cab"><h2 id="rud-nome"></h2><span class="chip" id="rud-nivel"></span></div>
+        <p class="texto" id="rud-sobre"></p>
+        <div class="barra">
+          <div class="grupo"><span class="rotulo">Mão que começa</span><div class="seg" id="seg-inverter"><button data-v="nao">Direita</button><button data-v="sim">Esquerda</button></div></div>
+          <div class="mao-legenda"><span><b class="d">D</b> = mão direita</span><span><b class="e">E</b> = mão esquerda</span><span><b>&gt;</b> = acento</span><span><b>flam</b> / <b>drag</b> = notinhas antes</span></div>
+        </div>
+        <div class="sticking" id="sticking"></div>
+        <div class="duas">
+          <div class="grupo"><h3>Como estudar</h3><ol class="lista" id="rud-como"></ol></div>
+          <div class="grupo"><h3>Dica de professor</h3><div class="caixa" id="rud-dica"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== RITMOS (GROOVES) ===== -->
+  <section class="vista" id="v-grooves" hidden>
+    <div class="layout">
+      <nav class="itens" id="gr-lista" aria-label="Ritmos"></nav>
+      <div class="cartao">
+        <div class="cab"><h2 id="gr-nome"></h2><span class="chip" id="gr-nivel"></span></div>
+        <p class="texto" id="gr-sobre"></p>
+        <div class="barra">
+          <div class="grupo"><span class="rotulo">Som da bateria</span><div class="seg" id="seg-guia"><button data-v="junto">Tocar junto</button><button data-v="guia">Só guia (clique)</button></div></div>
+          <div class="grupo"><span class="rotulo">Virada</span><div class="seg" id="seg-virada"><button data-v="nao">Sem virada</button><button data-v="sim">A cada 4 compassos</button></div></div>
+          <div class="grupo"><span class="rotulo">Peças</span><div class="seg" id="seg-pecas"><button data-v="usadas">Só as usadas</button><button data-v="todas">Todas</button></div></div>
+          <button class="botao" id="gr-restaurar">Restaurar ritmo</button>
+        </div>
+        <div class="rolagem"><div class="grade" id="grade-gr"></div></div>
+        <div class="legenda" id="legenda"></div>
+        <div class="duas">
+          <div class="grupo"><h3>Como tocar</h3><ol class="lista" id="gr-como"></ol></div>
+          <div class="grupo"><h3>Dica de professor</h3><div class="caixa" id="gr-dica"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== INDEPENDÊNCIA ===== -->
+  <section class="vista" id="v-independencia" hidden>
+    <div class="cartao">
+      <div class="cab"><h2>Independência dos membros</h2></div>
+      <p class="texto">Uma parte fica fixa e outra muda a cada variação. É o mesmo princípio dos métodos de coordenação usados nos cursos: cada membro faz uma coisa diferente, e você treina até a parte fixa ficar automática.</p>
+      <div class="barra">
+        <div class="grupo"><label class="rotulo" for="ind-serie">Série</label><select id="ind-serie"></select></div>
+        <div class="grupo"><span class="rotulo">Avançar sozinho</span><div class="seg" id="seg-avanco"><button data-v="0">Não</button><button data-v="2">a cada 2</button><button data-v="4">a cada 4</button><button data-v="8">a cada 8</button></div></div>
+        <div class="grupo"><span class="rotulo">Som da bateria</span><div class="seg" id="seg-guia2"><button data-v="junto">Tocar junto</button><button data-v="guia">Só guia (clique)</button></div></div>
+      </div>
+      <div class="grupo"><span class="rotulo">Variação</span><div class="variacoes" id="variacoes"></div></div>
+      <p class="texto" id="ind-sobre"></p>
+      <div class="rolagem"><div class="grade" id="grade-ind"></div></div>
+      <div class="caixa" id="ind-dica"></div>
+    </div>
+  </section>
+
+  <!-- ===== TÉCNICA E ROTINA ===== -->
+  <section class="vista" id="v-tecnica" hidden>
+    <div class="cartao">
+      <h2>Rotina diária de 40 minutos</h2>
+      <p class="texto">Os planos de ensino de bateria seguem esta ordem: postura e aquecimento com metrônomo, técnica de mãos e pés, independência e, por último, ritmos e repertório. A rotina segue a mesma sequência.</p>
+      <ol class="plano">
+        <li><span class="min">5 min</span><b>Aquecimento</b><span class="texto">Toque simples e toque duplo na caixa, devagar, a 60–70 bpm.</span></li>
+        <li><span class="min">10 min</span><b>Rudimentos</b><span class="texto">Um rudimento por dia com “Subir andamento” ligado. Pare no bpm em que ainda sai limpo.</span></li>
+        <li><span class="min">10 min</span><b>Independência</b><span class="texto">Uma série completa, com “Avançar sozinho” a cada 4 compassos.</span></li>
+        <li><span class="min">15 min</span><b>Ritmos</b><span class="texto">Um ritmo novo com virada, depois os compassos mudos para testar o seu tempo.</span></li>
+      </ol>
+    </div>
+    <div class="tec-grade" id="tec-grade"></div>
+  </section>
+</div>
+
+<script src="js/script.js"></script> <!-- nosso JavaScript, no fim para o HTML já existir -->
+</body>
+</html>
